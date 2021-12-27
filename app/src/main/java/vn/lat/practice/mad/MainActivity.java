@@ -43,10 +43,12 @@ import java.util.Date;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 
-public class MainActivity extends AppCompatActivity implements ImageAnalysis.Analyzer, View.OnClickListener {
-    private ListenableFuture<ProcessCameraProvider> cameraProviderFuture;
+public class MainActivity
+        extends AppCompatActivity
+        implements ImageAnalysis.Analyzer, View.OnClickListener {
 
-    PreviewView previewView;
+    private ListenableFuture<ProcessCameraProvider> cameraProviderFuture;
+    private PreviewView previewView;
     private ImageCapture imageCapture;
     private VideoCapture videoCapture;
     private Button bRecord;
@@ -66,24 +68,45 @@ public class MainActivity extends AppCompatActivity implements ImageAnalysis.Ana
         bRecord.setOnClickListener(this);
 
         cameraProviderFuture = ProcessCameraProvider.getInstance(this);
-        cameraProviderFuture.addListener(() -> {
-            try {
-                ProcessCameraProvider cameraProvider = cameraProviderFuture.get();
-                startCameraX(cameraProvider);
-            } catch (ExecutionException | InterruptedException e) {
-                e.printStackTrace();
-            }
-        }, getExecutor());
-
+        cameraProviderFuture.addListener(
+                () -> {
+                    try {
+                        ProcessCameraProvider cameraProvider = cameraProviderFuture.get();
+                        startCameraX(cameraProvider);
+                    } catch (ExecutionException | InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                },
+                getExecutor());
     }
 
-    Executor getExecutor() {
+    @SuppressLint({"RestrictedApi", "NonConstantResourceId", "SetTextI18n"})
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.bCapture:
+                capturePhoto();
+                break;
+            case R.id.bRecord:
+                if (bRecord.getText() == "start recording") {
+                    bRecord.setText("stop recording");
+                    recordVideo();
+                } else {
+                    bRecord.setText("start recording");
+                    videoCapture.stopRecording();
+                }
+                break;
+        }
+    }
+
+    private Executor getExecutor() {
         return ContextCompat.getMainExecutor(this);
     }
 
     @SuppressLint("RestrictedApi")
     private void startCameraX(ProcessCameraProvider cameraProvider) {
         cameraProvider.unbindAll();
+        //
         CameraSelector cameraSelector = new CameraSelector.Builder()
                 .requireLensFacing(CameraSelector.LENS_FACING_BACK)
                 .build();
@@ -119,25 +142,6 @@ public class MainActivity extends AppCompatActivity implements ImageAnalysis.Ana
         image.close();
     }
 
-    @SuppressLint("RestrictedApi")
-    @Override
-    public void onClick(View view) {
-        switch (view.getId()) {
-            case R.id.bCapture:
-                capturePhoto();
-                break;
-            case R.id.bRecord:
-                if (bRecord.getText() == "start recording") {
-                    bRecord.setText("stop recording");
-                    recordVideo();
-                } else {
-                    bRecord.setText("start recording");
-                    videoCapture.stopRecording();
-                }
-                break;
-
-        }
-    }
 
     @SuppressLint("RestrictedApi")
     private void recordVideo() {
