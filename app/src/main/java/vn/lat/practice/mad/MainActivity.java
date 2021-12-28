@@ -132,7 +132,7 @@ public class MainActivity
         imageAnalysis.setAnalyzer(getExecutor(), this);
 
         //bind to lifecycle:
-        cameraProvider.bindToLifecycle((LifecycleOwner) this, cameraSelector, preview, imageCapture, videoCapture);
+        cameraProvider.bindToLifecycle(this, cameraSelector, preview, imageCapture, videoCapture);
     }
 
     @Override
